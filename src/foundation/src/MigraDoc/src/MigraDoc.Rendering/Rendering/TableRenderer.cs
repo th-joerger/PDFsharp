@@ -250,8 +250,8 @@ namespace MigraDoc.Rendering
             int cellRowIndex = cell.Row.Index; // Cache property result.
             if (cellRowIndex > _lastHeaderRow)
                 y += startingHeight;
-            else
-                y += CalcMaxTopBorderWidth(0);
+            //else
+            //    y += CalcMaxTopBorderWidth(0);
 
 #if true
             if (!_bottomBorderMap.TryGetValue(cellRowIndex, out var upperBorderPos))
@@ -285,7 +285,8 @@ namespace MigraDoc.Rendering
             {
                 x += _table.Columns[clmIdx]?.Width.Point ?? NRT.ThrowOnNull<int>();
             }
-            x += LeftBorderOffset;
+            // vitision: Do NOT offset cell X by left border width — border extends outward from margin
+            // x += LeftBorderOffset;
 
             return new(x, y, width, height);
         }
@@ -403,7 +404,7 @@ namespace MigraDoc.Rendering
                 _startRow < _table.Rows.Count)
                 offset = _bottomBorderMap[_startRow] - topHeight;
             else
-                offset = -CalcMaxTopBorderWidth(0);
+                offset = 0;  // was: -CalcMaxTopBorderWidth(0)
 
             int probeRow = _startRow;
             XUnitPt currentHeight = 0;
@@ -433,7 +434,7 @@ namespace MigraDoc.Rendering
                     startingHeight = probeHeight;
                 }
 
-                if (probeHeight > area.Height)
+                if (probeHeight > area.Height + XUnitPt.FromPoint(0.5))
                     break;
 
                 else
@@ -487,7 +488,8 @@ namespace MigraDoc.Rendering
             if (_currRow >= 0)
             {
                 layoutInfo.ContentArea = new Rectangle(area.X, area.Y, 0, currentHeight);
-                XUnitPt width = LeftBorderOffset;
+                // vitision: Do NOT include left border offset in table width — border extends outward
+                XUnitPt width = 0;
                 //foreach (Column clm in _table.Columns)
                 foreach (var clm in _table.Columns.Cast<Column>())
                 {
@@ -503,8 +505,8 @@ namespace MigraDoc.Rendering
 
             else if (_table.Rows.Alignment == RowAlignment.Left)
             {
-                XUnitPt leftOffset = LeftBorderOffset;
-                leftOffset += _table.Columns[0].LeftPadding.Point;
+                // vitision: Do NOT shift table left by border offset — border extends outward from margin
+                XUnitPt leftOffset = _table.Columns[0].LeftPadding.Point;
                 layoutInfo.Left = -leftOffset;
             }
 
@@ -554,7 +556,7 @@ namespace MigraDoc.Rendering
             if (_lastHeaderRow >= 0)
             {
                 height = _bottomBorderMap[_lastHeaderRow + 1];
-                height += CalcMaxTopBorderWidth(0);
+                // height += CalcMaxTopBorderWidth(0);
             }
             else
             {
