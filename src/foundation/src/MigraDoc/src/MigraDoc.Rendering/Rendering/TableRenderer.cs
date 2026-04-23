@@ -905,6 +905,35 @@ namespace MigraDoc.Rendering
                     return cell;
                 }
             }
+
+            // Fallback: all cells in this row begin multi-row spans (MergeDown > 0), so no cell satisfies
+            // resultRowIndex + MergeDown == row above. Find the cell with the minimum MergeDown instead,
+            // matching the behaviour of GetMinMergedCellOriginal.  This happens when a single cell spans
+            // all columns AND more than one row (e.g. MergeRight = columnCount-1, MergeDown >= 1).
+            int minMergeDown = int.MaxValue;
+            Cell? minCell = null;
+            for (int idx = 0; idx < clsCount; idx++)
+            {
+                var cell = resultRow[idx];
+                if (!_mergedCells.Contains(cell))
+                    continue;
+                if (cell.MergeDown < minMergeDown)
+                {
+                    minMergeDown = cell.MergeDown;
+                    minCell = cell;
+                    if (minMergeDown == 0)
+                        break; // Can't get better.
+                }
+            }
+            if (minCell is not null)
+            {
+#if DEBUG
+                Debug.Assert(originalResult.Row!.Index + originalResult.MergeDown ==
+                             minCell.Row!.Index + minCell.MergeDown);
+#endif
+                return minCell;
+            }
+
             throw new InvalidOperationException("GetMinMergedCell: Unexpected problem #1");
         }
 
