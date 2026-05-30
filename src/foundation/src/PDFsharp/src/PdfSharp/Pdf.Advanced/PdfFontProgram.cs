@@ -30,9 +30,10 @@ namespace PdfSharp.Pdf.Advanced
             byte[] fontData;
             if (isCff && subSet.TableDictionary.TryGetValue("CFF ", out var cffEntry))
             {
-                // Extract just the CFF table bytes (more spec-compliant for FontFile3).
-                fontData = new byte[cffEntry.Length];
-                Array.Copy(subSet.FontSource.Bytes, cffEntry.Offset, fontData, 0, cffEntry.Length);
+                // Try HarfBuzz hb-subset first: produces a properly subsetted CFF table (~2-5 KB vs ~19 KB full).
+                fontData = HarfBuzzCffSubsetter.TrySubsetCff(subSet.FontSource.Bytes, cmapInfo.GlyphIndices.Keys)
+                    // Fall back to the full CFF table if HarfBuzz is unavailable or fails.
+                    ?? GetBytes(subSet.FontSource.Bytes, cffEntry.Offset, cffEntry.Length);
             }
             else
             {
@@ -59,6 +60,13 @@ namespace PdfSharp.Pdf.Advanced
             }
             Elements["/Length"] = new PdfInteger(fontData.Length);
             CreateStream(fontData);
+        }
+
+        static byte[] GetBytes(byte[] source, int offset, int length)
+        {
+            var result = new byte[length];
+            Array.Copy(source, offset, result, 0, length);
+            return result;
         }
     }
 }

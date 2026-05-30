@@ -805,7 +805,7 @@ namespace PdfSharp.Pdf
 
         /// <summary>
         /// Creates a new page and adds it to this document.
-        /// Depending on the IsMetric property of the current region the page size is set to 
+        /// Depending on the IsMetric property of the current region the page size is set to
         /// A4 or Letter respectively. If this size is not appropriate it should be changed before
         /// any drawing operations are performed on the page.
         /// </summary>

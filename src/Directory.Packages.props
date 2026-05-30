@@ -36,6 +36,7 @@
 
     <!-- Other packages -->
     <PackageVersion Include="System.Resources.Extensions" Version="8.0.0" />
+    <PackageVersion Include="HarfBuzzSharp.NativeAssets.Win32" Version="7.3.0" />
   </ItemGroup>
 
 </Project>
