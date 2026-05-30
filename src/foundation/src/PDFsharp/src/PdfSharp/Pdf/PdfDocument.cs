@@ -483,15 +483,7 @@ namespace PdfSharp.Pdf
             // Keep original producer if file was imported. This is 'PDF created by' in Adobe Reader.
             string producer = info.Producer;
             if (producer.Length == 0)
-            {
                 producer = pdfProducer;
-            }
-            else
-            {
-                // Prevent endless concatenation if file is edited with PDFsharp more than once.
-                if (!producer.StartsWith(PdfSharpProductVersionInformation.Title, StringComparison.Ordinal))
-                    producer = $"{pdfProducer} (Original: {producer})";
-            }
             info.Elements.SetString(PdfDocumentInformation.Keys.Producer, producer);
 
             // Prepare used fonts.
@@ -512,7 +504,8 @@ namespace PdfSharp.Pdf
 
             // #PDF-UA
             // Create PdfMetadata now to include the final document information in XMP generation.
-            Catalog.Elements.SetReference(PdfCatalog.Keys.Metadata, new PdfMetadata(this));
+            if (Options.ManualXmpGeneration == false)
+                Catalog.Elements.SetReference(PdfCatalog.Keys.Metadata, new PdfMetadata(this));
         }
 
         /// <summary>
@@ -879,10 +872,11 @@ namespace PdfSharp.Pdf
         /// </summary>
         /// <param name="name">The name used to refer and to entitle the embedded file.</param>
         /// <param name="path">The path of the file to embed.</param>
-        public void AddEmbeddedFile(string name, string path)
+        /// <param name="checksum">A 16-byte string which is a MD5 checksum of the bytes of the file</param>
+        public void AddEmbeddedFile(string name, string path, string? checksum = null)
         {
             var stream = new FileStream(path, FileMode.Open);
-            AddEmbeddedFile(name, stream);
+            AddEmbeddedFile(name, stream, checksum);
         }
 
         /// <summary>
@@ -890,8 +884,9 @@ namespace PdfSharp.Pdf
         /// </summary>
         /// <param name="name">The name used to refer and to entitle the embedded file.</param>
         /// <param name="stream">The stream containing the file to embed.</param>
-        public void AddEmbeddedFile(string name, Stream stream)
-            => Internals.Catalog.Names.AddEmbeddedFile(name, stream);
+        /// <param name="checksum">A 16-byte string which is a MD5 checksum of the bytes of the file</param>
+        public void AddEmbeddedFile(string name, Stream stream, string? checksum = null)
+            => Internals.Catalog.Names.AddEmbeddedFile(name, stream, checksum);
 
         /// <summary>
         /// Flattens a document (make the fields non-editable).
