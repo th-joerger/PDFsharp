@@ -23,10 +23,14 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         {
             Elements.SetName(Keys.Type, "/Font");
-            Elements.SetName(Keys.Subtype, "/TrueType");
 
             // TrueType with WinAnsiEncoding only.
             OpenTypeDescriptor otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(font);
+            // Set /Type1 subtype for CFF/OTF fonts; /TrueType for genuine TrueType fonts.
+            // PDF/A-3b requires FontFile2 for TrueType and FontFile3/Type1C for Type1.
+            bool isCff = otDescriptor.FontFace.loca == null;
+            Elements.SetName(Keys.Subtype, isCff ? "/Type1" : "/TrueType");
+
             FontDescriptor = document.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, font.GlyphTypeface.GetBaseName());
 
             // When the font subset is created, the cmap table must be added.
@@ -58,10 +62,14 @@ namespace PdfSharp.Pdf.Advanced
             : base(document)
         {
             Elements.SetName(Keys.Type, "/Font");
-            Elements.SetName(Keys.Subtype, "/TrueType");
 
             // TrueType with WinAnsiEncoding only.
             OpenTypeDescriptor otDescriptor = (OpenTypeDescriptor)FontDescriptorCache.GetOrCreateDescriptorFor(glyphTypeface);
+            // Set /Type1 subtype for CFF/OTF fonts; /TrueType for genuine TrueType fonts.
+            // PDF/A-3b requires FontFile2 for TrueType and FontFile3/Type1C for Type1.
+            bool isCff = otDescriptor.FontFace.loca == null;
+            Elements.SetName(Keys.Subtype, isCff ? "/Type1" : "/TrueType");
+
             FontDescriptor = document.PdfFontDescriptorCache.GetOrCreatePdfDescriptorFor(otDescriptor, glyphTypeface.GetBaseName());
 
             // When the font subset is created, the cmap table must be added.
@@ -163,7 +171,7 @@ namespace PdfSharp.Pdf.Advanced
             public new const string Subtype = "/Subtype";
 
             /// <summary>
-            /// (Required in PDF 1.0; optional otherwise) The name by which this font is 
+            /// (Required in PDF 1.0; optional otherwise) The name by which this font is
             /// referenced in the Font subdictionary of the current resource dictionary.
             /// </summary>
             [KeyInfo(KeyType.Name | KeyType.Optional)]
@@ -172,7 +180,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Required) The PostScript name of the font. For Type 1 fonts, this is usually
             /// the value of the FontName entry in the font program; for more information.
-            /// The Post-Script name of the font can be used to find the font’s definition in 
+            /// The Post-Script name of the font can be used to find the font’s definition in
             /// the consumer application or its environment. It is also the name that is used when
             /// printing to a PostScript output device.
             /// </summary>
@@ -180,7 +188,7 @@ namespace PdfSharp.Pdf.Advanced
             public new const string BaseFont = "/BaseFont";
 
             /// <summary>
-            /// (Required except for the standard 14 fonts) The first character code defined 
+            /// (Required except for the standard 14 fonts) The first character code defined
             /// in the font’s Widths array.
             /// </summary>
             [KeyInfo(KeyType.Integer)]
@@ -197,10 +205,10 @@ namespace PdfSharp.Pdf.Advanced
             /// (Required except for the standard 14 fonts; indirect reference preferred)
             /// An array of (LastChar - FirstChar + 1) widths, each element being the glyph width
             /// for the character code that equals FirstChar plus the array index. For character
-            /// codes outside the range FirstChar to LastChar, the value of MissingWidth from the 
-            /// FontDescriptor entry for this font is used. The glyph widths are measured in units 
-            /// in which 1000 units corresponds to 1 unit in text space. These widths must be 
-            /// consistent with the actual widths given in the font program. 
+            /// codes outside the range FirstChar to LastChar, the value of MissingWidth from the
+            /// FontDescriptor entry for this font is used. The glyph widths are measured in units
+            /// in which 1000 units corresponds to 1 unit in text space. These widths must be
+            /// consistent with the actual widths given in the font program.
             /// </summary>
             [KeyInfo(KeyType.Array, typeof(PdfArray))]
             public const string Widths = "/Widths";
@@ -208,7 +216,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Required except for the standard 14 fonts; must be an indirect reference)
             /// A font descriptor describing the font’s metrics other than its glyph widths.
-            /// Note: For the standard 14 fonts, the entries FirstChar, LastChar, Widths, and 
+            /// Note: For the standard 14 fonts, the entries FirstChar, LastChar, Widths, and
             /// FontDescriptor must either all be present or all be absent. Ordinarily, they are
             /// absent; specifying them enables a standard font to be overridden.
             /// </summary>
@@ -218,7 +226,7 @@ namespace PdfSharp.Pdf.Advanced
             /// <summary>
             /// (Optional) A specification of the font’s character encoding if different from its
             /// built-in encoding. The value of Encoding is either the name of a predefined
-            /// encoding (MacRomanEncoding, MacExpertEncoding, or WinAnsiEncoding, as described in 
+            /// encoding (MacRomanEncoding, MacExpertEncoding, or WinAnsiEncoding, as described in
             /// Appendix D) or an encoding dictionary that specifies differences from the font’s
             /// built-in encoding or from a specified predefined encoding.
             /// </summary>
