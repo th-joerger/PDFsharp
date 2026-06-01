@@ -211,6 +211,7 @@
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfFontDescriptor.cs" Link="Pdf.Advanced\PdfFontDescriptor.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfFontDescriptorCache.cs" Link="Pdf.Advanced\PdfFontDescriptorCache.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfFontProgram.cs" Link="Pdf.Advanced\PdfFontProgram.cs" />
+    <Compile Include="..\PdfSharp\Pdf.Advanced\HarfBuzzCffSubsetter.cs" Link="Pdf.Advanced\HarfBuzzCffSubsetter.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfFontTable.cs" Link="Pdf.Advanced\PdfFontTable.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfFormXObject.cs" Link="Pdf.Advanced\PdfFormXObject.cs" />
     <Compile Include="..\PdfSharp\Pdf.Advanced\PdfFormXObjectTable.cs" Link="Pdf.Advanced\PdfFormXObjectTable.cs" />
@@ -412,6 +413,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.Shared\PdfSharp.Shared.csproj" />
     <ProjectReference Include="..\..\..\shared\src\PdfSharp.System\PdfSharp.System.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- HarfBuzz hb-subset native runtime for CFF font subsetting. -->
+    <PackageReference Include="HarfBuzzSharp.NativeAssets.Win32" />
   </ItemGroup>
 
   <ItemGroup>

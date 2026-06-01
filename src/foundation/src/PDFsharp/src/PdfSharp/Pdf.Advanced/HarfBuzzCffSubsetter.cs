@@ -19,6 +19,8 @@ namespace PdfSharp.Pdf.Advanced
         [DllImport(Lib)] static extern IntPtr hb_subset_input_create_or_fail();
         [DllImport(Lib)] static extern IntPtr hb_subset_input_glyph_set(IntPtr input);
         [DllImport(Lib)] static extern void hb_set_add(IntPtr set, uint codepoint);
+        // HB_SUBSET_FLAGS_RETAIN_GIDS = 2: preserve original glyph IDs so PDF content stream references remain valid.
+        [DllImport(Lib)] static extern void hb_subset_input_set_flags(IntPtr input, uint flags);
         [DllImport(Lib)] static extern IntPtr hb_subset_or_fail(IntPtr face, IntPtr input);
         [DllImport(Lib)] static extern IntPtr hb_face_reference_blob(IntPtr face);
         [DllImport(Lib)] static extern IntPtr hb_blob_get_data(IntPtr blob, out uint length);
@@ -50,6 +52,11 @@ namespace PdfSharp.Pdf.Advanced
 
                 inputPtr = hb_subset_input_create_or_fail();
                 if (inputPtr == IntPtr.Zero) return null;
+
+                // RETAIN_GIDS: PDFsharp encodes original glyph IDs in the content stream;
+                // without this flag HarfBuzz remaps IDs sequentially and all references break.
+                const uint HB_SUBSET_FLAGS_RETAIN_GIDS = 2u;
+                hb_subset_input_set_flags(inputPtr, HB_SUBSET_FLAGS_RETAIN_GIDS);
 
                 var glyphSet = hb_subset_input_glyph_set(inputPtr);
                 hb_set_add(glyphSet, 0); // always include .notdef (glyph 0)
